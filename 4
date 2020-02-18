@@ -1,0 +1,24 @@
+import java.util.Scanner;
+
+public class NumberTypeUtility {
+    
+    public static void main (String[] args) {
+          Scanner sc=new Scanner(System.in);
+          int in=sc.nextInt();
+        NumberType nm=isOdd();
+        boolean b=nm.checkNumberType(in);
+      if(b){
+          System.out.println(in+" is odd");
+      }
+      else
+      System.out.println(in+" is not odd");
+      
+        //Fill the code
+    }
+    public static NumberType isOdd(){
+        NumberType obj=(x) -> {
+            return (x%2!=0);
+        };
+        return obj;
+    }
+}
