@@ -1,0 +1,115 @@
+
+
+SRC : 2BUY4
+
+Select ToBuyForItemId,	ItemId	,ParentToBuyForItemId,	GrandparentToBuyForItemId,		ItemLevel,	ItemStatusCode,	
+DifferentiatorLevel1Color,	
+DifferentiatorLevel2Size,	OrganizationalUnitId,
+	DepartmentId,	ClassificationId,	SubClassificationId,
+	BrandName,	BrandDescription,	ItemShortDesc	,
+		ItemRetail,	ItemCompareAtRetail
+FROM [APP].[ItemMaster] with (nolock) 
+--where ItemLevel = 2
+
+
+SRC : ORACLE
+
+SELECT ITEM,
+DEPT,
+CLASS ,
+SUBCLASS ,
+DIFF_1,
+DIFF_2,
+BRAND_NAME,
+ORIGINAL_RETAIL,
+ITEM_LEVEL,
+ITEM_PARENT,
+CREATE_DATETIME,
+LAST_UPDATE_DATETIME 
+FROM DAS_PRD.ITEM_MASTER READONLY 
+--where ITEM_LEVEL = 2 
+ORDER BY ITEM 
+
+SRC : AS400
+
+Select  IXNUM, ICRPH , IDLT ,IDTADD, IMLA, IDV, IDP, IVNUM, ISTYL, IKOLR, IMKOLR, IYMS,
+ IFMSD , ILUPD , IUP#, I#STR,iseas from mblib.mbpitmh 
+ --WHERE IMLA = 2;
+
+SRC : AS400
+
+Select IXNUM, ICRPH , IDLT ,IDTADD, IMLA, IDV, IDP, IVNUM, ISTYL, 
+IKOLR, IMKOLR, IYMS, IFMSD , ILUPD , IUP#, I#STR , iseas  from molib.mopitmh
+--WHERE IMLA = 2;
+
+---====================================================================
+
+
+--Select * from [DAS_STG].[2Buy4Item] with (Nolock) ;
+--Select * from  [DAS_STG].[ORACLE_ITEMMASTER] with (Nolock) ;
+--Select * from  [DAS_STG].[AS400_MBPITMH_MOPITMH] with (Nolock) ;
+
+--====================================================================================
+
+Select * from [DAS_STG].[2Buy4Item] with (Nolock) where itemID = '38605346';
+Select * from  [DAS_STG].[ORACLE_ITEMMASTER] with (Nolock) where item = '38605346';
+Select * from  [DAS_STG].[AS400_MBPITMH_MOPITMH] with (Nolock) where IXNUM ='38605346' ;
+
+
+--======================================================================================
+
+-- 1. AS400 SKU not in 2BUY4
+
+SELECT  IXNUM,	ICRPH,	IDLT,	IDTADD,
+	IMLA,	IDV,	IDP,	IVNUM,	ISTYL,	IKOLR,
+	IMKOLR,	IYMS,	IFMSD,	ILUPD,	I#STR,	IUP# , ISEAS
+ FROM [DAS_STG].[AS400_MBPITMH_MOPITMH]   AS B with (nolock)
+  full outer 
+  JOIN [DAS_STG].[2BUY4ITEM] AS A with (nolock)
+    ON A.itemid = B.ixnum 
+ WHERE  A.itemid is null ; 
+ 
+
+ 
+ -- 2. 2BUY4 ItemID not in AS400
+ 
+ SELECT 
+ ToBuyForItemId,	ItemId,	ItemLevel,	DifferentiatorLevel1Color,	DifferentiatorLevel2Size,	DepartmentId,	ClassificationId,	
+ SubClassificationId,	ItemShortDesc,	ItemRetail,	BrandName,	ParentToBuyForItemId,	GrandparentToBuyForItemId,
+ ItemStatusCode,	OrganizationalUnitId,	BrandDescription,	ItemCompareAtRetail
+ FROM [DAS_STG].[2BUY4ITEM]   AS B with (nolock)
+  full outer 
+  JOIN [DAS_STG].[AS400_MBPITMH_MOPITMH] AS A with (nolock)
+    ON B.itemid = A.ixnum 
+ WHERE  A.ixnum is null and ItemLevel = 2; 
+ 
+ 
+ -- 3. ORACLE_RMS ITEM not in 2BUY4
+ 
+SELECT  ITEM,	ITEM_PARENT,	ITEM_LEVEL, BRAND_NAME,	DIFF_1,	DIFF_2,	DEPT,
+	CLASS,	SUBCLASS,	ORIGINAL_RETAIL,	CREATE_DATETIME,
+	LAST_UPDATE_DATETIME	 
+	FROM [DAS_STG].[ORACLE_ITEMMASTER]  AS B 
+  full outer 
+  JOIN [DAS_STG].[2BUY4ITEM] AS A 
+    ON A.itemid = B.item 
+ WHERE  A.itemid is null AND  ITEM_LEVEL = 2 ; 
+ 
+
+
+ 
+ -- 4. 2BUY4 ItemID not in ORACLE_RMS
+  
+ SELECT 
+ ToBuyForItemId,	ItemId,	ItemLevel,	DifferentiatorLevel1Color,	DifferentiatorLevel2Size,	DepartmentId,	ClassificationId,	
+ SubClassificationId,	ItemShortDesc,	ItemRetail,	BrandName,	ParentToBuyForItemId,	GrandparentToBuyForItemId,
+ ItemStatusCode,	OrganizationalUnitId,	BrandDescription,	ItemCompareAtRetail
+ FROM [DAS_STG].[2BUY4ITEM]   AS B 
+  full outer 
+  JOIN [DAS_STG].[ORACLE_ITEMMASTER] AS A 
+    ON B.itemid = A.item 
+ WHERE  A.item is null and ItemLevel = 2; 
+
+
+ X:\Offshore\Alok\ToBuyForRmsSyncStatus
+ 
